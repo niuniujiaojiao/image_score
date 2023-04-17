@@ -226,7 +226,7 @@ def blur_score(original, generated, report=False) -> float:
     """
     Takes two images (one of a real image, one for a SD-generated one)
     and calculates a score for the generated image in terms of blurriness.
-    The score should lie from -0.3 to 1 and is equivalent to
+    The score should lie from -0.3 to 1.3 and is equivalent to
     calculate_blur(generated) - 0.3*[calculate_blur(generated) - calculate_blur(original)].
     It can also print a report of the blurriness of both photos.
 
@@ -236,7 +236,7 @@ def blur_score(original, generated, report=False) -> float:
         report (bool)- optional, prints the individual blur scores for each image
 
     return (float):
-        the blur score, from -0.3 to 1
+        the blur score, from -0.3 (best) to 1.3 (worst)
     """
     og_blur = calculate_blur(original)
     gen_blur = calculate_blur(generated)
@@ -692,12 +692,16 @@ def composition_score(gen, model="hog", border=0.2, scale=0.5, report=False) -> 
 def distortion_score(og, gen, report=False) -> float:
     """
     Takes an original and generated image and scores how natural/undistorted the light distribution
-    in the generated image looks, also compared to the original, using BRISQUE.
+    in the generated image looks, also compared to the original, using BRISQUE. The score is calculated
+    as distortion(generated) - 0.3*(distortion(original) - distortion(generated)) and should lie between
+    -0.3 and 1.3.
 
     args:
         og (filepath or array)- original image
         gen (filepath or array)- generated image
         report (bool)- optional, prints the BRISQUE scores for the original and generated image
+    return (float):
+        distortion of generated image and improvement from the original, from -0.3 (best) to 1.3 (worst)
     """
     original = load_image(og)
     generated = load_image(gen)
