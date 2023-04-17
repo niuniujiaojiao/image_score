@@ -8,5 +8,5 @@ setup(name='image_score',
       author_email='crystal.wang@yale.edu',
       license='',
       packages=['image_score'],
-      install_requires=['numpy', 'PIL', 'scipy', 'dlib', 'face_recognition', 'itertools', 'brisque'],
+      install_requires=['numpy', 'Pillow', 'scipy', 'dlib', 'face_recognition', 'brisque'],
       zip_safe=False)
