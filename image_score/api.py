@@ -689,6 +689,22 @@ def composition_score(gen, model="hog", border=0.2, scale=0.5, report=False) -> 
 
 # 4. Naturalness. Scores each photo on levels of noise, oversmoothing, or other distortion.
 
+def calculate_distortion(img) -> float:
+    """
+    Calculates distortion of an image from a scale to 0 (completely natural) to 1 (completely distorted).
+
+    args:
+        img (filepath or array)- filepath to or numpy array of an image
+    return (float):
+        distortion intensity, from 0 (best) to 1 (worst)
+    """
+    
+    image = load_image(img)
+    scorer = BRISQUE(url=False)
+    score = scorer.score(image)/100
+
+    return score
+
 def distortion_score(og, gen, report=False) -> float:
     """
     Takes an original and generated image and scores how natural/undistorted the light distribution
@@ -703,12 +719,9 @@ def distortion_score(og, gen, report=False) -> float:
     return (float):
         distortion of generated image and improvement from the original, from -0.3 (best) to 1.3 (worst)
     """
-    original = load_image(og)
-    generated = load_image(gen)
-    scorer = BRISQUE(url=False)
 
-    og_score = scorer.score(original)/100
-    gen_score = scorer.score(generated)/100
+    og_score = calculate_distortion(og)
+    gen_score = calculate_distortion(gen)
 
     if report==True:
         print(f'The original image has distortion {round(og_score, 3)} and the generated has distortion {round(gen_score, 3)}.')
@@ -720,8 +733,9 @@ def distortion_score(og, gen, report=False) -> float:
 
 def score(original, generated, model="hog", border=0.2, scale=0.5, report=False) -> dict:
     """
-    Takes an original and generated image and scores the generated image on the metrics of blurriness 
-    improvement, face faithfulness to original, photo composition, and distortion improvement.
+    Takes an original and generated image and scores the generated image on the metrics of blurriness,
+    face faithfulness to original, photo composition, and distortion. It also shows the improvement
+    on blur and distortion.
     "cnn" strongly recommended for model if GPU acceleration is available.
 
     args:
@@ -736,12 +750,20 @@ def score(original, generated, model="hog", border=0.2, scale=0.5, report=False)
     """
 
     # find scores
-    blurriness = blur_score(original, generated, report)
+    og_blur = calculate_blur(original)
+    gen_blur = calculate_blur(generated)
+    if report==True:
+        print(f'The original image has blur {round(og_blur, 3)} and the generated has blur {round(gen_blur, 3)}.')
     dissimilarity = face_score(original, generated, model, report)
     composition = composition_score(generated, model, border, scale, report)
-    distortion = distortion_score(original, generated, report)
+    og_distortion = calculate_distortion(original)
+    gen_distortion = calculate_distortion(generated)
+    if report==True:
+        print(f'The original image has distortion {round(og_distortion, 3)} and the generated has distortion {round(gen_distortion, 3)}.')
 
-    return {"blurriness": blurriness,
+    return {"blurriness": gen_blur,
+            "blur pct change": (gen_blur-og_blur)/og_blur,
             "face dissimilarity": dissimilarity,
             "compositional distance": composition,
-            "distortion": distortion}
+            "distortion": gen_distortion,
+            "distortion pct change": (gen_distortion-og_distortion)/og_distortion}
