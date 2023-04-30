@@ -907,11 +907,11 @@ def score_individual(image, model="hog", border=0.2, scale=0.5, report=False, lo
     if type(image) != list:
         blur = calculate_blur(image)
         if report==True:
-            print(f'blurriness: {blur}.')
+            print(f'blurriness: {round(blur, 3)}.')
         composition = calculate_composition(image, model, border, scale, report, locs)
         distortion = calculate_distortion(image)
         if report==True:
-            print(f'distortion: {distortion}.')
+            print(f'distortion: {round(distortion, 3)}.')
     else: # batch mode
         blur = []
         composition = []
@@ -920,11 +920,12 @@ def score_individual(image, model="hog", border=0.2, scale=0.5, report=False, lo
             blr = calculate_blur(img)
             blur.append(blr)
             if report==True:
-                print(f'blurriness: {blr}.')
-            composition.append(calculate_composition(img, model, border, scale, report, locs))
+                print(f'blurriness: {round(blr, 3)}.')
+            cmps = calculate_composition(img, model, border, scale, report, locs)
+            composition.append(cmps)
             dstr = calculate_distortion(img)
             if report==True:
-                print(f'distortion: {dstr}.')
+                print(f'distortion: {round(dstr, 3)}.')
             distortion.append(dstr)
     
     return {"blurriness": blur,
@@ -982,4 +983,3 @@ def score(original, generated, model="hog", border=0.2, scale=0.5, report=False)
                 "composition pct change": list((np.array(gen_composition)-og_composition)/og_composition),
                 "distortion": gen_distortion,
                 "distortion pct change": list((np.array(gen_distortion)-og_distortion)/og_distortion)}
-
