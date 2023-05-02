@@ -801,7 +801,7 @@ def composition_score(original, generated, model="hog", border=0.2, scale=0.5, r
     """
     if type(generated)==list: # batch mode
         # get original blur
-        original_composition = calculate_composition(original)
+        original_composition = calculate_composition(original, model, border, scale, report)
         # collect all scores
         scores = []
         for gen in generated:
@@ -809,7 +809,7 @@ def composition_score(original, generated, model="hog", border=0.2, scale=0.5, r
             scores.append(score)
         return scores
     else:
-        return _composition_score(original, generated, model, border, report)
+        return _composition_score(original, generated, model, border, scale, report)
 
 # 4. Naturalness. Scores each photo on levels of noise, oversmoothing, or other distortion.
 
